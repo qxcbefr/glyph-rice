@@ -85,6 +85,16 @@ snippet below gives it one.
 
 <h2 align="center">Screenshots</h2>
 
+![window switcher](screenshots/win.png)
+
+The dock, the corner tray and the window switcher, from this fork:
+
+| | |
+|:---:|:---:|
+| ![dock](screenshots/dock.png) **Dock** — one tile per app, the white one is focused | ![tray](screenshots/tray.png) **Corner tray** — services and the clock |
+
+<div align="center"><br></div>
+
 | | |
 |:---:|:---:|
 | ![launcher](screenshots/launcher.png) **Launcher** | ![quick](screenshots/quick.png) **Quick** |
