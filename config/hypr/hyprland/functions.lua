@@ -93,6 +93,68 @@ local function toggle_special(name)
     end
 end
 
+-- hypr has no minimize: tag the window and park it on a special workspace, the same key
+-- brings the parked windows back to the active one (wiki: lua code snippets)
+local function minimize()
+    local active = hl.get_active_workspace()
+    local parked = false
+    for _, ws in ipairs(hl.get_workspaces()) do
+        if ws.name == "special:minimized" and ws.windows > 0 then parked = true end
+    end
+
+    if parked and active and active.name ~= "special:minimized" then
+        hl.dispatch(hl.dsp.window.move({ workspace = active, window = "tag:minimized" }))
+        hl.dispatch(hl.dsp.window.clear_tags({ window = "tag:minimized" }))
+        return
+    end
+
+    local win = hl.get_active_window()
+    if win then
+        hl.dispatch(hl.dsp.window.tag({ tag = "minimized", window = win }))
+        hl.dispatch(hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
+    end
+end
+
+-- hide every window on the current workspace (show desktop): they go to a special workspace,
+-- the same key moves them back. Addresses are collected first: dispatching invalidates the list
+local function hide_all()
+    local active = hl.get_active_workspace()
+    if not active then return end
+
+    -- a selector like tag:hidden only ever moves the first match -- walk the addresses instead
+    local parked = {}
+    for _, win in ipairs(hl.get_windows() or {}) do
+        for _, tag in ipairs(win.tags or {}) do
+            if tag == "hidden" then
+                table.insert(parked, win.address)
+                break
+            end
+        end
+    end
+
+    if #parked > 0 then
+        for _, address in ipairs(parked) do
+            local win = "address:" .. address
+            hl.dispatch(hl.dsp.window.move({ workspace = active, window = win }))
+            hl.dispatch(hl.dsp.window.clear_tags({ window = win }))
+        end
+        return
+    end
+
+    local targets = {}
+    for _, win in ipairs(hl.get_windows() or {}) do
+        if win.mapped and not win.hidden and win.workspace and win.workspace.id == active.id then
+            table.insert(targets, win.address)
+        end
+    end
+
+    for _, address in ipairs(targets) do
+        local win = "address:" .. address
+        hl.dispatch(hl.dsp.window.tag({ tag = "hidden", window = win }))
+        hl.dispatch(hl.dsp.window.move({ workspace = "special:hidden", follow = false, window = win }))
+    end
+end
+
 -- gpu-screen-recorder screen capture: the same keybind again -- stop
 local function record(region, sound)
     return function()
@@ -104,6 +166,8 @@ local function record(region, sound)
 end
 
 return {
+    hide_all             = hide_all,
+    minimize             = minimize,
     toggle_special       = toggle_special,
     record               = record,
     resizer              = resizer,

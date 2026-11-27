@@ -8,7 +8,8 @@ import qs.components
 
 // launcher: tap Super or Super+Space. Panel 860 centered, screen dims to 74%. Search pill with a red caret,
 // modes as chips (Tab): apps / run / windows / calc. No query -- "recent" and all apps in a grid of 6, alphabet on the right.
-// Appears like Charms and Clip: rises 24 and fades. Icons -- monochrome glyphs in circles, unknown ones -- the icon itself as dots; selected -- white circle
+// Appears like Charms and Clip: rises 24 and fades. Icons -- the app's own icon as dots; only an entry with no icon
+// falls back to a monochrome glyph; selected -- white circle
 PanelWindow {
     id: root
 
@@ -18,7 +19,7 @@ PanelWindow {
     readonly property string query: input.text
     property var uses: ({}) // app id -> how many times opened
 
-    // glyphs for known apps; key -- a lowercase piece of id/name
+    // glyph fallback for entries with no icon file (run commands, icon-less apps); key -- a lowercase piece of id/name
     readonly property var glyphs: [
         ["zen", "\u{F0239}"], ["firefox", "\u{F0239}"], ["chrom", "\u{F059F}"], ["kitty", "\u{F018D}"], ["foot", "\u{F018D}"],
         ["spotify", "\u{F04C7}"], ["telegram", "\u{F2C6}"], ["codium", "\u{F0A1E}"], ["code", "\u{F0A1E}"], ["steam", "\u{F04D3}"],
@@ -346,7 +347,7 @@ PanelWindow {
         flick.contentY = Math.min(Math.max(0, flick.contentHeight - flick.height), allGrid.mapToItem(body, 0, 0).y + Math.floor(i / 6) * (88 + 10 + 20 + 22));
     }
 
-    // app: circle 88 with a glyph or dotted icon, label -- matched letters white
+    // app: circle 88 with the dotted icon (a glyph only when there is no icon), label -- matched letters white
     component Cell: Column {
         id: cell
         required property int index
@@ -363,16 +364,10 @@ PanelWindow {
             height: 88
             radius: 44
             color: cell.on ? Theme.fg : Theme.s2
-            Icon {
-                anchors.centerIn: parent
-                visible: !!cell.modelData.glyph
-                text: cell.modelData.glyph ?? ""
-                font.pixelSize: 36
-                color: cell.on ? Theme.ink : Theme.fg
-            }
             Image {
+                id: pic
                 anchors.centerIn: parent
-                visible: !cell.modelData.glyph && status === Image.Ready
+                visible: status === Image.Ready
                 width: 44
                 height: 44
                 source: cell.modelData.src ?? ""
@@ -381,6 +376,14 @@ PanelWindow {
                 retainWhileLoading: true // the cell's app changed -- old icon while the new one loads
                 layer.enabled: true
                 layer.effect: Dm { step: 2.5 }
+            }
+            // only when the entry has no icon at all: a known app's glyph, so the circle is never empty
+            Icon {
+                anchors.centerIn: parent
+                visible: !pic.visible && !!cell.modelData.glyph
+                text: cell.modelData.glyph ?? ""
+                font.pixelSize: 36
+                color: cell.on ? Theme.ink : Theme.fg
             }
             TapHandler { onTapped: { root.sel = cell.modelData.k; root.launch(); } }
             HoverHandler { cursorShape: Qt.PointingHandCursor }

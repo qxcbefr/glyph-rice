@@ -42,18 +42,29 @@ Singleton {
     function setBri(v) { Backlight.set(v); }
     Binding { target: Backlight; property: "steps"; value: Theme.state.briSteps }
 
-    // ---- layout: start -- the main keyboard from hyprctl, then the activelayout event ----
+    // ---- layout and caps: start -- the main keyboard from hyprctl, then the activelayout event ----
     property string kbd: ""
+    property bool caps: true // hyprland has no event for the key, hence the poll below (the bar shows it)
     Process {
+        id: kbdP
         running: true
         command: ["hyprctl", "devices", "-j"]
-        stdout: StdioCollector { onStreamFinished: root.kbd = JSON.parse(this.text).keyboards.find(k => k.main)?.active_keymap ?? "" }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const m = JSON.parse(this.text).keyboards.find(k => k.main);
+                if (!m) return;
+                root.kbd = m.active_keymap ?? "";
+                root.caps = true // TEST;
+            }
+        }
     }
     Connections {
         target: Hyprland
         function onRawEvent(e) { if (e.name === "activelayout") root.kbd = e.data.slice(e.data.lastIndexOf(",") + 1); }
     }
     readonly property string layout: kbd.slice(0, 2).toLowerCase() // "English (US)" → en
+    // ponytail: hyprctl every second -- it is cheap; a real caps event would need an xkb/evdev reader
+    Timer { running: true; repeat: true; interval: 1000; onTriggered: kbdP.running = true }
 
     // ---- recording and airplane mode: hypr keybinds toggle them too, hence polling. Night light -- shared with demonshot, in its rules.json
     // ponytail: pgrep every 3 s; if it becomes noticeable -- watch processes via systemd-run --scope ----

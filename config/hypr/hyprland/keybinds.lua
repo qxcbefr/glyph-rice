@@ -154,6 +154,8 @@ hl.bind(vars.kbPinWindow, hl.dsp.window.pin())
 hl.bind(vars.kbWindowFullscreen, hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(vars.kbWindowBorderedFullscreen, hl.dsp.window.fullscreen({ mode = "maximized" }))
 hl.bind(vars.kbToggleWindowFloating, hl.dsp.window.float())
+hl.bind(vars.kbMinimizeWindow, fn.minimize)
+hl.bind(vars.kbHideWindow, fn.hide_all)
 hl.bind(vars.kbCloseWindow, hl.dsp.window.close())
 
 -- Special workspace toggles

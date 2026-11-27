@@ -7,6 +7,7 @@ import "cal"
 import "charms"
 import "clip"
 import "deck"
+import "dock"
 import "glyph"
 import "home"
 import "launcher"
@@ -17,6 +18,7 @@ import "settings"
 import "shot"
 import "vpn"
 import "wall"
+import "win"
 
 // glyph: rice in the spirit of nothing os. Home on the wallpaper, bar, launcher, quick settings,
 // Glyph strips at the edges instead of OSD, notification island, power menu, settings, deck (bottom dashboard), clipboard, charms (emoji and symbols), screenshots, vpn, wallpapers. Lock -- a separate process (lock.qml).
@@ -33,10 +35,14 @@ ShellRoot {
     Cal { id: cal }
     Clip { id: clip }
     Charms { id: charms }
+    // dock and tray before the deck: same layer, so the deck's panel slides out over them instead of under them
+    Dock { id: dock; onMarkClicked: launcher.toggle() }
+    Corner { id: tray; onQuickClicked: quick.toggle() }
     Deck { id: deck }
     Shot { id: shot }
     Vpn { id: vpn }
     Walls { id: walls }
+    Win { id: win }
 
     Variants {
         model: Quickshell.screens
@@ -110,6 +116,8 @@ ShellRoot {
     Shortcut { name: "clip"; description: "clipboard"; onPressed: clip.toggle() }
     Shortcut { name: "charms"; description: "emoji, kaomoji, symbols"; onPressed: charms.toggle() }
     Shortcut { name: "wall"; description: "wallpapers"; onPressed: walls.toggle() }
+    // Super+Tab -- window switcher: every window, dotted icons, pick one and go
+    Shortcut { name: "win"; description: "window switcher"; onPressed: win.toggle() }
     Shortcut { name: "game"; description: "game mode"; onPressed: Rules.store.game = !Rules.store.game }
 
     component Shortcut: GlobalShortcut { appid: "shell" }

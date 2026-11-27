@@ -47,8 +47,8 @@ Singleton {
     function wallSrc(p) { return p ? `${wallCache}/${p.slice(p.lastIndexOf("/") + 1)}.jpg` : ""; }
 
     function fade(c, a) { return Qt.rgba(c.r, c.g, c.b, a); }
-    // clock per 12/24 setting: "09" or "9"
-    function hh(d) { const h = d.getHours(); return st.clock24 ? String(h).padStart(2, "0") : String(h % 12 || 12); }
+    // clock per 12/24 setting: "09" or "09" -- hours are always two digits (a lone 9 looks wrong next to mm)
+    function hh(d) { const h = d.getHours(); return String(st.clock24 ? h : (h % 12 || 12)).padStart(2, "0"); }
     function hex(c) { return c.toString().slice(1, 7).toUpperCase(); }
 
     // as in Rules: apply() at startup must see glyph.json, not the defaults
@@ -71,7 +71,7 @@ Singleton {
             property int unread: 0    // for the lock
             // ---- what the settings (prefs) change ----
             property var widgets: ["weather", "calendar", "cpu", "player", "buds", "system"] // home bento in order, see kinds
-            property bool clock24: true
+            property bool clock24: false
             property bool blink: true      // clock colon blinks
             property string name: ""       // in the greeting; empty -- $USER
             property bool grid: true       // dot grid on the wallpaper
@@ -88,7 +88,7 @@ Singleton {
             property bool quickHover: true // quick settings on hover at the right edge
             property bool deckHover: true  // deck -- bottom-center panel, slides out on hovering the edge
             property var deck: ["clock", "weather", "perf", "net", "media"] // its sections in order, see decks
-            property var bar: ["layout", "wifi", "bluetooth", "sound", "notes", "battery", "mode", "power"] // bar tray from top to bottom, see bars
+            property var bar: ["layout", "caps", "wifi", "bluetooth", "sound", "notes", "battery", "mode", "power"] // bar tray from top to bottom, see bars
             property bool barTitle: true   // window title stacked in the bar
             // recording (quick/Rec, Sys.recArgs)
             property int recArea: 0        // 0 whole monitor, 1 region (slurp)
@@ -104,7 +104,7 @@ Singleton {
     // deck sections
     readonly property var decks: ["clock", "weather", "perf", "net", "media"]
     // bar tray
-    readonly property var bars: ["layout", "wifi", "bluetooth", "sound", "notes", "battery", "mode", "power"]
+    readonly property var bars: ["layout", "caps", "wifi", "bluetooth", "sound", "notes", "battery", "mode", "power"]
 
     // ---- the look of everything outside the shell. Called only by shell.qml: at startup and on theme change ----
     // hypr inherits from demonshot: monitor, input, idle, night light and motion are set by its Rules (shell.qml), animations -- from the

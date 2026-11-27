@@ -104,17 +104,19 @@ return {
     kbWindowFullscreen         = "SUPER + F",
     kbWindowBorderedFullscreen = "SUPER + ALT + F",
     kbToggleWindowFloating     = "SUPER + ALT + space",
-    kbCloseWindow              = "SUPER + Q",
+    kbMinimizeWindow           = "SUPER + D", -- parks the window on special:minimized, same key brings it back
+    kbHideWindow               = "SUPER + M", -- hides every window on the screen, same key shows them
+    kbCloseWindow              = "SUPER + C",
 
     -- Special workspaces toggles
     kbSpecialWs                = "SUPER + S",
     kbSystemMonitorWs          = "CTRL + SHIFT + Escape",
-    kbMusicWs                  = "SUPER + M",
-    kbCommunicationWs          = "SUPER + D",
+    kbMusicWs                  = "SUPER + ALT + M",
+    kbCommunicationWs          = "SUPER + ALT + D",
     kbTodoWs                   = "SUPER + R",
 
     -- Apps
-    kbTerminal                 = "SUPER + T",
+    kbTerminal                 = "SUPER + Q",
     kbBrowser                  = "SUPER + W",
     kbEditor                   = "SUPER + SHIFT + K",
     kbFileExplorer             = "SUPER + E",

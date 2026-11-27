@@ -24,7 +24,7 @@ Scope {
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
     readonly property var en: Qt.locale("en_US")
-    function hm(d) { return Qt.formatTime(d, Theme.state.clock24 ? "hh:mm" : "h:mm ap"); }
+    function hm(d) { return Qt.formatTime(d, Theme.state.clock24 ? "hh:mm" : "hh:mm ap"); }
     function week(d) { // ISO week, as in Home
         const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
@@ -122,7 +122,7 @@ Scope {
                     Lb { text: root.en.dayName(clock.date.getDay()) + (Theme.state.clock24 ? "" : clock.date.getHours() < 12 ? " · am" : " · pm") }
                     Num {
                         topPadding: lead + 10
-                        text: Theme.state.clock24 ? Qt.formatTime(clock.date, "hh:mm") : (clock.date.getHours() % 12 || 12) + Qt.formatTime(clock.date, ":mm")
+                        text: Theme.hh(clock.date) + Qt.formatTime(clock.date, ":mm")
                         font.pixelSize: 72
                     }
                     Lb { topPadding: 12; text: `${root.en.toString(clock.date, "d MMMM")} · week ${root.week(clock.date)}` }

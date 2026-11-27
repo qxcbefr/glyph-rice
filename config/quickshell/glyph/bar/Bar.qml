@@ -31,6 +31,8 @@ PanelWindow {
     readonly property var top: ToplevelManager.activeToplevel
     readonly property var bat: UPower.displayDevice
     readonly property var wifi: Networking.devices.values.find(d => d.type === DeviceType.Wifi) ?? null
+    // tray glyph size. The pill is 64 wide -- at 19 the icons read as specks next to the 30px clock
+    readonly property int iconPx: 24
 
     // hyprland 0.56 with lua: dispatch accepts a lua expression
     function go(ws) { Hyprland.dispatch(`hl.dsp.focus({ workspace = "${ws}" })`); }
@@ -121,6 +123,13 @@ PanelWindow {
                 anchors.centerIn: parent
                 TapHandler { onTapped: root.clockClicked() }
                 HoverHandler { cursorShape: Qt.PointingHandCursor }
+                // 12-hour: the digits no longer say which half of the day it is -- the meridiem above them does (24-hour: nothing)
+                Lb {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: !Theme.state.clock24
+                    text: Qt.formatTime(clock.date, "AP")
+                    px: 9
+                }
                 Num {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Theme.hh(clock.date)
@@ -141,34 +150,48 @@ PanelWindow {
 
             // tray -- Theme.state.bar in order (settings, BAR section). Layout, network, bluetooth, sound (wheel -- volume),
             // notifications, battery: a click opens quick settings. Power mode and power -- their own clicks
+            // one full-width row per part: a Column lays its children out from its left edge, so a child asking for
+            // horizontalCenter is ignored -- the row does the centering instead, and every icon lands on the pill's axis
             Column {
-                anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 22 }
-                spacing: 20
+                width: parent.width
+                anchors { bottom: parent.bottom; bottomMargin: 22 }
+                spacing: 18
 
                 Repeater {
                     model: Theme.state.bar
-                    Loader {
-                        id: part
+                    Item {
+                        id: slot
                         required property string modelData
-                        readonly property bool quick: modelData !== "mode" && modelData !== "power"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        sourceComponent: root.parts[modelData] ?? null
-                        visible: !!sourceComponent && (modelData !== "battery" || root.bat.isLaptopBattery)
-                        TapHandler { enabled: part.quick; onTapped: root.trayClicked() }
-                        HoverHandler { enabled: part.quick; cursorShape: Qt.PointingHandCursor }
+                        width: parent.width
+                        height: Math.max(root.iconPx + 4, part.implicitHeight)
+                        visible: part.shown
+                        Loader {
+                            id: part
+                            readonly property bool shown: !!sourceComponent
+                                && (slot.modelData !== "battery" || root.bat.isLaptopBattery)
+                                && (slot.modelData !== "caps" || Sys.caps)
+                            readonly property bool quick: slot.modelData !== "mode" && slot.modelData !== "power"
+                            anchors.centerIn: parent
+                            sourceComponent: root.parts[slot.modelData] ?? null
+                            TapHandler { enabled: part.quick; onTapped: root.trayClicked() }
+                            HoverHandler { enabled: part.quick; cursorShape: Qt.PointingHandCursor }
+                        }
                     }
                 }
             }
         }
     }
 
-    readonly property var parts: ({ layout: layoutC, wifi: wifiC, bluetooth: btC, sound: soundC, notes: notesC, battery: batC, mode: modeC, power: powerC })
-    Component { id: layoutC; Lb { text: Sys.layout; px: 10 } }
+    readonly property var parts: ({ layout: layoutC, caps: capsC, wifi: wifiC, bluetooth: btC, sound: soundC, notes: notesC, battery: batC, mode: modeC, power: powerC })
+    Component { id: layoutC; Lb { text: Sys.layout; px: 11 } }
+    // caps lock on -- shows while the key is lit, nothing otherwise (the tray row is skipped, no gap left)
+    Component { id: capsC; Lb { text: "caps"; px: 10; color: Sys.caps ? Theme.fg : Theme.grey } }
     Component {
         id: wifiC
         Icon {
             text: Networking.wifiEnabled ? "\u{F05A9}" : "\u{F05AA}"
             color: root.wifi?.connected ? Theme.fg : Theme.grey
+            font.pixelSize: root.iconPx
         }
     }
     Component {
@@ -176,12 +199,14 @@ PanelWindow {
         Icon {
             text: Bluetooth.defaultAdapter?.enabled ? "\u{F00AF}" : "\u{F00B2}"
             color: Bluetooth.devices.values.some(d => d.connected) ? Theme.fg : Theme.grey
+            font.pixelSize: root.iconPx
         }
     }
     Component {
         id: soundC
         Icon {
             text: Sys.muted ? "\u{F075F}" : "\u{F057E}"
+            font.pixelSize: root.iconPx
             WheelHandler { onWheel: e => Sys.setVol(Sys.vol + (e.angleDelta.y > 0 ? 0.05 : -0.05)) }
         }
     }
@@ -190,6 +215,7 @@ PanelWindow {
         Icon {
             text: Theme.state.dnd ? "\u{F009B}" : "\u{F009A}"
             color: Notes.list.length ? Theme.fg : Theme.grey
+            font.pixelSize: root.iconPx
         }
     }
     // in a vertical bar the battery stands upright, charge grows from the bottom. Charging -- a bolt on top, the fill breathes while charging
@@ -206,25 +232,25 @@ PanelWindow {
             property real phase: 0
             readonly property real pulse: charging ? 0.675 + 0.325 * Math.cos(phase * Math.PI / 1.1) : 1
             Timer { running: batc.charging; interval: 50; repeat: true; onTriggered: batc.phase = (batc.phase + 0.05) % 2.2; onRunningChanged: batc.phase = 0 }
-            Icon { visible: batc.ac; anchors.horizontalCenter: parent.horizontalCenter; text: "\u{F140B}"; font.pixelSize: 14 }
+            Icon { visible: batc.ac; anchors.horizontalCenter: parent.horizontalCenter; text: "\u{F140B}"; font.pixelSize: 18 }
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 14
-                height: 26
-                radius: 7
+                width: 18
+                height: 34
+                radius: 9
                 color: "transparent"
                 border { width: 1.5; color: Theme.grey }
                 Rectangle {
-                    x: 3
-                    width: parent.width - 6
-                    height: (parent.height - 6) * root.bat.percentage
-                    anchors { bottom: parent.bottom; bottomMargin: 3 }
-                    radius: 4
+                    x: 3.5
+                    width: parent.width - 7
+                    height: (parent.height - 7) * root.bat.percentage
+                    anchors { bottom: parent.bottom; bottomMargin: 3.5 }
+                    radius: 5
                     color: root.batLow ? Theme.red : Theme.fg
                     opacity: batc.pulse
                 }
             }
-            Lb { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(root.bat.percentage * 100); px: 10 }
+            Lb { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(root.bat.percentage * 100); px: 11 }
         }
     }
     // power mode as ticks (Rules.modes): ultra -- one, performance -- all; click -- next,
@@ -233,8 +259,8 @@ PanelWindow {
         id: modeC
         Item {
             id: ticks
-            width: 40
-            height: 22
+            width: 46
+            height: 24
             Row {
                 anchors.centerIn: parent
                 spacing: 2
@@ -243,9 +269,9 @@ PanelWindow {
                     Rectangle {
                         required property int index
                         anchors.bottom: parent.bottom
-                        width: 3
-                        height: 5 + index * 3
-                        radius: 1.5
+                        width: 4
+                        height: 6 + index * 4
+                        radius: 2
                         color: index <= Rules.mode ? Theme.fg : Theme.s3
                     }
                 }
@@ -258,6 +284,7 @@ PanelWindow {
         id: powerC
         Icon {
             text: "\u{F0425}"
+            font.pixelSize: root.iconPx
             color: pwr.hovered ? Theme.fg : Theme.grey
             HoverHandler { id: pwr; cursorShape: Qt.PointingHandCursor }
             TapHandler { onTapped: root.powerClicked() }
