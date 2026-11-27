@@ -56,7 +56,7 @@ Also: Hyprland (Lua), hypridle, kitty, fish, starship, fastfetch, btop, cava (do
 <h2 align="center">Install</h2>
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/yasakei/glyph-rice/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/qxcbefr/glyph-rice/main/install.sh | bash
 ```
 
 Arch and its derivatives (CachyOS, EndeavourOS). That one line clones the repo to `~/.local/share/glyph`, installs
@@ -67,7 +67,7 @@ Log out afterwards and pick Hyprland in sddm.
 By hand, or to re-run later:
 
 ```sh
-git clone https://github.com/yasakei/glyph-rice ~/.local/share/glyph
+git clone https://github.com/qxcbefr/glyph-rice ~/.local/share/glyph
 ~/.local/share/glyph/install.sh --with telegram  # pick extras up front instead of being asked
 ~/.local/share/glyph/install.sh --links          # any distro: symlinks only, packages are up to you
 ```

@@ -6,7 +6,7 @@
 #   ./install.sh --links           symlinks only (on an already configured system)
 set -euo pipefail
 
-REPO=${GLYPH_REPO:-https://github.com/yasakei/glyph-rice}
+REPO=${GLYPH_REPO:-https://github.com/qxcbefr/glyph-rice}
 DOTS="$(cd "$(dirname "$0")" && pwd)"
 BACKUP="$HOME/.dots-backup-$(date +%F_%H-%M-%S)"
 
