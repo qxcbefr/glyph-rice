@@ -24,6 +24,7 @@ My fork of [**glyph-rice**](https://github.com/Nebelung-cloud/glyph-rice) by [**
 | **Home** | clock, greeting, widgets (cava as a round Glyph Matrix), dot grid | |
 | **Glyph** | screen edges as OSD: volume, brightness, notifications, progress | |
 | **Launcher** | apps, commands, windows, calculator | `Super` |
+| **Win** | window switcher: every window as a dotted tile, pick one and go | — |
 | **Quick** | quick settings, game mode, media, notifications; also opens from the right edge | `Super` `A` |
 | **Deck** | dashboard from the bottom edge | `Super` `Space` |
 | **Prefs** | settings, bar and home layout | `Super` `I` |
@@ -39,6 +40,12 @@ My fork of [**glyph-rice**](https://github.com/Nebelung-cloud/glyph-rice) by [**
 | **Rice** | shell switcher, if Demon's Shot is installed too | `rice switch <name>` |
 
 Also: Hyprland (Lua), hypridle, kitty, fish, starship, fastfetch, btop, cava (dots in fish; `command cava` for bars), GTK, Qt and folder colours.
+
+Two keys this fork adds, because Hyprland has neither minimize nor show-desktop: `Super` `D` parks the focused
+window on a special workspace and `Super` `M` hides every window on the current one — the same key brings them
+back. The window switcher has no key out of the box; the `user.lua` snippet below gives it `Ctrl` `Super` `Tab`.
+The bar's tray also carries a caps-lock dot, and the clock reads 12-hour with a meridiem — `Super` `I`, the
+**24 hours** toggle, if you want the other one.
 
 <div align="center"><img src="assets/divider-glyph.svg" width="720" alt=""></div>
 
@@ -72,7 +79,7 @@ git clone https://github.com/qxcbefr/glyph-rice ~/.local/share/glyph
 ~/.local/share/glyph/install.sh --links          # any distro: symlinks only, packages are up to you
 ```
 
-Extras: `telegram` (`Super` `D`), `spotify` with Spicetify (`Super` `M`), `clash` for the VPN panel.
+Extras: `telegram` (`Super` `Alt` `D` opens its workspace), `spotify` with Spicetify (`Super` `Alt` `M`), `clash` for the VPN panel.
 
 | `config/` | goes to |
 |---|---|
@@ -93,9 +100,10 @@ Apps for the special workspaces and the editor are read when you press the key, 
 local apps = require("variables").apps
 apps.editor = "codium"              -- Super Shift K, empty by default
 apps.todo   = "planify"             -- Super R, empty by default
-apps.music  = "spicetify watch -s"  -- Super M, spotify-launcher by default
+apps.music  = "spicetify watch -s"  -- Super Alt M, spotify-launcher by default
 
-hl.bind("SUPER + G", hl.dsp.global("shell:game"))  -- game mode has no key by default
+hl.bind("SUPER + G", hl.dsp.global("shell:game"))            -- game mode has no key by default
+hl.bind("CTRL + SUPER + TAB", hl.dsp.global("shell:win"))   -- window switcher, same
 ```
 
 <div align="center"><img src="assets/divider-glyph.svg" width="720" alt=""></div>
@@ -141,6 +149,10 @@ Fonts: Doto, Space Grotesk, Space Mono, JetBrains Mono Nerd Font.
 **Glyph** is made by [**Nebelung-cloud**](https://github.com/Nebelung-cloud): [glyph-rice](https://github.com/Nebelung-cloud/glyph-rice)
 and its sibling [Demon's Shot](https://github.com/Nebelung-cloud/demons-shot-rice). The shell, the launcher, the theme — all of it is his.
 This repository is my personal fork, kept under the same GPL-3.0 license; upstream is the place to look for the project itself.
+
+What my fork adds on top: the **dock** (open windows as dotted tiles along the bottom, click to focus) with its
+**corner tray**, the **window switcher**, minimize (`Super` `D`) and show-desktop (`Super` `M`), the caps-lock dot
+in the tray, and the 12-hour clock with its meridiem. Everything else is his.
 
 <div align="center"><img src="assets/divider-dots.svg" width="720" alt=""></div>
 
