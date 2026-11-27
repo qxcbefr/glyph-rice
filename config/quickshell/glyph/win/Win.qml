@@ -36,7 +36,11 @@ PanelWindow {
     // shuffles under the cursor. live: whatever the desktop says is mapped right now. tl -- the wl toplevel, the preview's source
     function list() {
         return Hyprland.toplevels.values
-            .filter(w => (w.lastIpcObject ?? {}).mapped !== false)
+            // classless toplevels are XWayland's input-method helpers ("Default IME"), never something to switch to
+            .filter(w => {
+                const o = w.lastIpcObject ?? {};
+                return o.mapped !== false && !!o.class;
+            })
             .map(w => {
                 const o = w.lastIpcObject ?? {};
                 const cls = o.class ?? "";
