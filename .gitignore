@@ -1,3 +1,6 @@
 # personal: your own hypr keybinds and earbud photos (buds/<device>.png, render from nothing.tech)
 config/hypr/user.lua
 config/quickshell/glyph/buds/*.png
+
+# fontconfig cache written next to the fonts
+config/fonts/.uuid

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Glyph: installs everything on a clean Arch and links the configs from this repo.
+#   curl -fsSL <raw>/install.sh | bash   clone-less: fetches the repo to ~/.local/share/glyph, then runs itself from there
 #   ./install.sh                   packages + services + symlinks; asks which EXTRA to install too
 #   ./install.sh --with telegram   same without the question (--with "" -- just the rice itself)
 #   ./install.sh --links           symlinks only (on an already configured system)
 set -euo pipefail
 
+REPO=${GLYPH_REPO:-https://github.com/yasakei/glyph-rice}
 DOTS="$(cd "$(dirname "$0")" && pwd)"
 BACKUP="$HOME/.dots-backup-$(date +%F_%H-%M-%S)"
 
@@ -62,13 +64,23 @@ LINKS=(
 
 say() { printf '\e[38;2;215;25;33m●\e[0m %s\n' "$*"; }
 
+# piped (curl | bash) there is no checkout: fetch one and continue from it. From then on the prompt reads the
+# terminal, not the pipe that carried the first copy of this file
+if [ ! -d "$DOTS/config/hypr" ]; then
+    command -v git >/dev/null || sudo pacman -S --needed --noconfirm git
+    say "no checkout here -- cloning $REPO to ~/.local/share/glyph"
+    git clone --depth 1 "$REPO" "$HOME/.local/share/glyph"
+    exec "$HOME/.local/share/glyph/install.sh" "$@"
+fi
+
 extras() { # --with or a prompt -> into EXT, installs yay (and repo packages) separately from AUR
     local w; EXT=()
     if [ -z "${WITH+x}" ]; then
         say "what else to install? space-separated, Enter -- nothing"
         for w in "${!EXTRA[@]}"; do printf '  %-9s %s\n' "$w" "${EXTRA[$w]}"; done
-        read -rp "  > " WITH || true
+        read -rp "  > " WITH </dev/tty || true
     fi
+    WITH=${WITH:-}
     for w in ${WITH//,/ }; do
         [ -n "${EXTRA[$w]-}" ] || { echo "no such option: $w (available: ${!EXTRA[*]})"; exit 1; }
         EXT+=(${EXTRA[$w]})

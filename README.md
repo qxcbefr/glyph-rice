@@ -19,6 +19,8 @@ My fork of [**glyph-rice**](https://github.com/Nebelung-cloud/glyph-rice) by [**
 | | | |
 |---|---|:---:|
 | **Bar** | launcher, workspaces, clock, tray | |
+| **Dock** | open apps at the bottom center, as dotted tiles | |
+| **Tray** | services and the clock at the bottom right, opens quick settings | |
 | **Home** | clock, greeting, widgets (cava as a round Glyph Matrix), dot grid | |
 | **Glyph** | screen edges as OSD: volume, brightness, notifications, progress | |
 | **Launcher** | apps, commands, windows, calculator | `Super` |
@@ -54,14 +56,23 @@ Also: Hyprland (Lua), hypridle, kitty, fish, starship, fastfetch, btop, cava (do
 <h2 align="center">Install</h2>
 
 ```sh
-git clone https://github.com/yasakei/glyph-rice ~/.local/share/glyph
-~/.local/share/glyph/install.sh                  # Arch: packages, services, symlinks
-~/.local/share/glyph/install.sh --with telegram  # same, extras picked up front
-~/.local/share/glyph/install.sh --links          # any distro: symlinks only
+curl -fsSL https://raw.githubusercontent.com/yasakei/glyph-rice/main/install.sh | bash
 ```
 
-Without `--with` it asks which extras to add: `telegram` (`Super` `D`), `spotify` with Spicetify (`Super` `M`),
-`clash` for the VPN panel. Old configs go to `~/.dots-backup-<date>/`. Wallpapers are read from `~/Pictures/Wallpapers`.
+Arch and its derivatives (CachyOS, EndeavourOS). That one line clones the repo to `~/.local/share/glyph`, installs
+Hyprland and everything the shell calls, enables the services, links the configs into `~/.config`, and asks which
+extras to add. Old configs go to `~/.dots-backup-<date>/`; wallpapers are read from `~/Pictures/Wallpapers`.
+Log out afterwards and pick Hyprland in sddm.
+
+By hand, or to re-run later:
+
+```sh
+git clone https://github.com/yasakei/glyph-rice ~/.local/share/glyph
+~/.local/share/glyph/install.sh --with telegram  # pick extras up front instead of being asked
+~/.local/share/glyph/install.sh --links          # any distro: symlinks only, packages are up to you
+```
+
+Extras: `telegram` (`Super` `D`), `spotify` with Spicetify (`Super` `M`), `clash` for the VPN panel.
 
 | `config/` | goes to |
 |---|---|
